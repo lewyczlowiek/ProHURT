@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Szczegóły Zamówienia</title>
+  <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f7fc;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            padding: 20px;
+            background-color: white;
+            margin: 50px auto;
+            width: 80%;
+            max-width: 1000px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        .order-details {
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+        }
+
+        .order-details div {
+            margin-bottom: 10px;
+        }
+
+        .product-list {
+            margin-top: 20px;
+        }
+
+        .product-list table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .product-list th, .product-list td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .summary-row {
+            margin-top: 30px;
+            font-weight: bold;
+            text-align: right;
+            padding: 10px;
+            border-top: 1px solid #333;
+        }
+
+        .back-btn {
+            padding: 10px 20px;
+            background-color: #00bf63;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            display: block;
+            width: fit-content;
+            margin: 20px auto;
+        }
+
+        .back-btn:hover {
+            background-color: #019d52;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+  <h2>Szczegóły Zamówienia</h2>
+
+  <div class="order-details">
+    <div><strong>Numer Zamówienia:</strong> <span th:text="${purchaseOrder.orderNumber}"></span></div>
+    <div><strong>Sklep:</strong> <span th:text="${purchaseOrder.store.name}"></span></div>
+    <div><strong>Status:</strong> <span th:text="${purchaseOrder.status.displayName}"></span></div>
+  </div>
+
+  <div class="product-list">
+    <h3>Produkty w Zamówieniu:</h3>
+    <table>
+      <thead>
+      <tr>
+        <th>Nazwa Produktu</th>
+        <th>Ilość</th>
+        <th>Cena za Sztukę</th>
+        <th>Cena Łączna</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="lineItem, iterStat : ${lineItems}">
+        <td th:text="${lineItem.item.name}"></td>
+        <td th:text="${lineItem.quantity}"></td>
+        <td th:text="${unitPrices[iterStat.index]} + ' PLN'"></td>
+        <td th:text="${totalPrices[iterStat.index]} + ' PLN'"></td>
+      </tr>
+      </tbody>
+    </table>
+
+    <!-- Wiersz podsumowujący łączną kwotę zamówienia -->
+    <div class="summary-row">
+      Łączna kwota zamówienia: <span th:text="${totalOrderPrice} + ' PLN'"></span>
+    </div>
+  </div>
+
+  <button class="back-btn" onclick="window.history.back()">Powrót</button>
+</div>
+
+</body>
+</html>

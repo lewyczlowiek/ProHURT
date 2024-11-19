@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Zarządzaj użytkownikami</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"/>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+             background-color: #306ab8;
+             width: 200px;
+             padding-top: 20px;
+             display: flex;
+             flex-direction: column;
+             justify-content: space-between;
+             align-items: center;
+        }
+
+        .sidebar a {
+            display: block;
+            color: #fff;
+            text-decoration: none;
+            font-size: 1.2em;
+            padding: 10px 20px;
+        }
+
+        .sidebar a:hover {
+            background-color: #285694;
+            border-radius: 15px;
+        }
+
+        .user-info {
+            text-align: center;
+            padding: 20px;
+            margin-top: auto;
+            color: white;
+        }
+
+        .user-icon img {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 5px;
+        }
+
+        .logout-button {
+            background-color: #004aad;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            margin: 20px;
+            border-radius: 15px;
+        }
+
+        .logout-button:hover {
+            background-color: #024092;
+        }
+
+        .container {
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 80%;
+            overflow-x: auto;
+            margin: 25px 50px 25px 50px;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 10px;
+            font-weight: bold;
+            font-size: 36px;
+        }
+
+        .add-container {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .add-user-button {
+            padding: 10px 12px;
+            background-color: #00bf63;
+            color: white;
+            border: none;
+            text-decoration: none;
+            border-radius: 15px;
+            cursor: pointer;
+        }
+
+        .add-user-button:hover {
+            background-color: #019d52;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            margin: 0 auto;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #306ab8;
+            color: white;
+        }
+
+        tr {
+            border-bottom: 1px solid #ddd;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            border: none;
+        }
+
+        .edit-button {
+            background-color: #ffed00;
+            color: black;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .delete-button {
+            background-color: #ff3131;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .edit-button:hover {
+            background-color: #ddcd02;
+            text-decoration: none;
+        }
+
+        .delete-button:hover {
+            background-color: #cf2727;
+        }
+
+        .footer-links {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+    </style>
+    <script>
+        function confirmDeletion() {
+            return confirm("Czy na pewno chcesz usunąć tego użytkownika?");
+        }
+    </script>
+</head>
+<body>
+<div class="sidebar">
+    <img style="height: 75px; weight: 75px;"src="/images/ProHURT.png" alt="Logo ProHURT">
+    <div>
+        <a style="margin-top: 150px" th:href="@{/index}">Strona główna</a>
+        <a th:href="@{/items}">Produkty</a>
+        <a th:href="@{/storeInventory}">Magazyn</a>
+        <a th:href="@{/users}">Zarządzaj użytkownikami</a>
+        <a th:href="@{/orders}">Zamówienia</a>
+    </div>
+    <div class="user-info">
+        <div class="user-icon">
+            <img th:src="@{/images/user.png}">
+        </div>
+        <p><span th:text="${username}"></span></p>
+        <form th:action="@{/auth/logout}" method="post">
+            <button type="submit" class="logout-button">Wyloguj</button>
+        </form>
+    </div>
+</div>
+
+<div class="container">
+    <div th:if="${reloginMessage}" style="color: red; font-weight: bold; margin-bottom: 20px;">
+        <p th:text="${reloginMessage}"></p>
+    </div>
+    <h2 style="margin-bottom: 50px; font-size: 42px;">Lista użytkowników</h2>
+    <div class="add-container">
+        <a href="/users/createUser" class="add-user-button">Dodaj nowego użytkownika</a>
+    </div>
+
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Imię</th>
+            <th>Nazwisko</th>
+            <th>Email</th>
+            <th>Rola</th>
+            <th style="text-align: center;">Akcje</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="user : ${users}">
+            <td th:text="${user.id}"></td>
+            <td th:text="${user.firstname}"></td>
+            <td th:text="${user.lastname}"></td>
+            <td th:text="${user.email}"></td>
+            <td th:text="${user.role}"></td>
+            <td class="actions">
+                <a th:href="@{/users/editUser(userId=${user.id})}" class="edit-button">Edytuj</a>
+                <form th:action="@{/users/deleteUser}" method="post" style="display:inline;"
+                      onsubmit="return confirmDeletion()">
+                    <input type="hidden" name="userId" th:value="${user.id}"/>
+                    <button type="submit" class="delete-button">Usuń</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <div class="footer-links">
+        <a href="/index">Powrót do strony głównej</a>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</body>
+</html>

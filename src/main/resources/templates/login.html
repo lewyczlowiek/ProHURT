@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Logowanie - ProHURT</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <style>
+        /* Styl podstawowy strony */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f4f6f8;
+        }
+
+        /* Styl logo */
+        .logo {
+            margin-bottom: 20px;
+        }
+
+        .logo img {
+            width: 280x;
+            height: 240px;
+        }
+
+        .login-container {
+            background-color: #fff;
+            padding: 40px 30px 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 340px;
+            text-align: center;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            margin: 20px 0;
+            color: #306ab8;
+        }
+
+        /* Styl pola formularza */
+        .input-group {
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        .input-group input[type="text"],
+        .input-group input[type="password"] {
+            width: 80%;
+            padding: 10px 15px 10px 40px;
+            font-size: 1rem;
+            border-radius: 25px;
+            border: 1px solid #306ab8;
+            outline: none;
+        }
+
+        .input-group .icon {
+            position: absolute;
+            top: 50%;
+            left: 15px;
+            transform: translateY(-50%);
+            font-size: 1rem;
+            color: #306ab8;
+        }
+
+        /* Styl przycisku logowania */
+        .login-button {
+            width: 60%;
+            padding: 10px;
+            font-size: 1rem;
+            color: #fff;
+            background-color: #306ab8;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.3s;
+        }
+
+        .login-button:hover {
+            background-color: #285694;
+        }
+
+        .forgot-password:hover {
+            color: #285694;
+        }
+    </style>
+</head>
+<body>
+
+<div class="logo">
+    <img src="/images/ProHURT.png" alt="Logo ProHURT">
+</div>
+<div class="login-container">
+    <h2>Zaloguj się</h2>
+    <div th:if="${param.logout}" class="success-message">
+        <p>Zostałeś pomyślnie wylogowany!</p>
+    </div>
+
+    <form th:action="@{/auth/login}" method="post">
+        <div th:if="${param.error}" class="error-message" style="color:red">
+            <p>Niepoprawne dane logowania!</p>
+        </div>
+        <div class="input-group">
+            <span class="icon"><i class="fas fa-user"></i></span>
+            <input type="text" name="username" placeholder="E-mail" required>
+        </div>
+
+        <div class="input-group">
+            <span class="icon"><i class="fas fa-lock"></i></span>
+            <input type="password" name="password" placeholder="Hasło" required>
+        </div>
+
+        <button type="submit" class="login-button">Zaloguj się</button>
+    </form>
+</div>
+
+</body>
+</html>
+

@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Lista Zamówień</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"/>
+  <style>
+       /* Podstawowe style strony */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Styl bocznego menu */
+        .sidebar {
+            background-color: #306ab8;
+            width: 200px;
+            padding-top: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sidebar a {
+            display: block;
+            color: #fff;
+            text-decoration: none;
+            font-size: 1.2em;
+            padding: 10px 20px;
+            margin: 3px;
+        }
+
+        .sidebar a:hover {
+            background-color: #285694;
+            border-radius: 15px;
+        }
+
+        .user-info {
+            text-align: center;
+            padding: 20px;
+            margin-top: auto;
+            color: white;
+        }
+
+        .user-icon img {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 5px;
+        }
+
+        .logout-button {
+            background-color: #004aad;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            margin: 20px;
+            border-radius: 15px;
+        }
+
+        .logout-button:hover {
+            background-color: #024092;
+        }
+
+        /* Styl kontenera z listą produktów */
+        .container {
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 80%;
+            overflow-x: auto;
+            margin: 25px 50px 25px 50px;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 10px;
+            font-weight: bold;
+            font-size: 36px;
+        }
+
+        /* Kontener dla wyszukiwania i przycisku dodawania */
+        .search-and-add-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        /* Styl formularza wyszukiwania */
+        .search-form {
+            display: flex;
+            align-items: center;
+            background-color: #fff;
+            padding: 10px;
+            border-radius: 25px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-form input[type="text"] {
+            border: 1px solid #306ab8;
+            border-radius: 15px;
+            padding: 8px 15px;
+            font-size: 1rem;
+            width: 200px;
+            outline: none;
+        }
+
+        .search-form input[type="text"]::placeholder {
+            color: #aaa;
+        }
+
+        .search-form button {
+            background-color: #306ab8;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            border-radius: 15px;
+            border: 1px solid #306ab8;
+        }
+
+        .search-form button i {
+            margin-right: 5px;
+        }
+
+        .search-form button:hover {
+            background-color: #285694;
+        }
+
+        /* Styl przycisku dodawania */
+        .button {
+            padding: 10px 12px;
+            background-color: #00bf63;
+            color: white;
+            border: none;
+            text-decoration: none;
+            border-radius: 15px;
+            cursor: pointer;
+        }
+
+        .button:hover {
+            background-color: #019d52;
+        }
+
+
+        .action-buttons {
+          display: flex;
+          gap: 10px; /* Odstęp między przyciskami */
+          justify-content: center; /* Wyrównanie przycisków na środku */
+        }
+
+        /* Styl ogólny dla przycisków */
+        .button {
+          padding: 10px 12px;
+            background-color: #00bf63;
+            color: white;
+            border: none;
+            text-decoration: none;
+            border-radius: 15px;
+            cursor: pointer;
+        }
+
+        .button:hover {
+          background-color: #019d52;
+        }
+
+        .edit-button {
+            background-color: #ffed00;
+            color: black;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .delete-button {
+            background-color: #ff3131;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .edit-button:hover {
+            background-color: #ddcd02;
+            text-decoration: none;
+        }
+
+        .delete-button:hover {
+            background-color: #cf2727;
+        }
+
+        /* Styl tabeli */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #306ab8;
+            color: white;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        tbody tr:hover {
+            background-color: #d1e7ff;
+        }
+
+        /* Stylizacja rozwijanych list */
+        .search-form select {
+            padding: 8px;
+            border: 1px solid #306ab8;
+            border-radius: 15px;
+            font-size: 1rem;
+            background-color: #fff;
+            color: #306ab8;
+            margin-right: 10px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .search-form select:hover {
+            background-color: #d1e7ff;
+        }
+  </style>
+
+  <script>
+  function checkAccess(url) {
+    console.log('Fetching access for URL:', url);
+    fetch(url, {
+      method: 'GET',
+      credentials: 'include'
+    }).then(response => {
+      if (response.status === 403) {
+        return response.json().then(data => {
+          alert(data.message); // Wyświetlenie komunikatu o braku uprawnień
+          window.location.reload(true);
+        });
+      } else if (response.ok) {
+        window.location.href = url; // Przekierowanie, jeśli użytkownik ma dostęp
+      }
+    }).catch(error => {
+      console.error('Error fetching access:', error);
+      alert("Nie masz odpowiednich uprawnień do tej akcji!");
+    });
+  }
+
+  // Funkcja do sprawdzenia dostępu przed usunięciem
+  function checkAccessAndConfirm(url) {
+    checkAccess(url);
+    return confirm ('Czy na pewno chcesz usunąć zamówienie?');
+  }
+  </script>
+</script>
+</head>
+<body>
+<div class="sidebar">
+  <img style="height: 75px; weight: 75px;" src="/images/ProHURT.png" alt="Logo ProHURT">
+  <div>
+    <a th:href="@{/index}" style="margin-top: 150px">Strona główna</a>
+    <a th:href="@{/items}">Produkty</a>
+    <a th:href="@{/storeInventory}">Magazyn</a>
+    <a href="#" onclick="checkAccess('/users')">Zarządzaj użytkownikami</a>
+    <a th:href="@{/orders}">Zamówienia</a>
+  </div>
+  <div class="user-info">
+    <div class="user-icon">
+      <img th:src="@{images/user.png}">
+    </div>
+    <p><span th:text="${firstname}"></span></p>
+    <form th:action="@{/auth/logout}" method="post">
+      <button type="submit" class="logout-button">Wyloguj</button>
+    </form>
+  </div>
+</div>
+
+<div class="container">
+  <h2>Lista Zamówień</h2>
+
+  <!-- Sekcja wyszukiwania i przycisk dodawania -->
+  <div class="search-and-add-container">
+    <form th:action="@{/orders}" method="get" class="search-form">
+      <input type="text" name="search" placeholder="Wpisz ID zamówienia lub status" />
+
+      <select style="margin-left: 10px;" name="status">
+        <option value="" selected>Wszystkie statusy</option>
+        <option th:value="${T(com.ProHURT.entities.OrderStatus).IN_PROGRESS.name()}">W trakcie realizacji</option>
+        <option th:value="${T(com.ProHURT.entities.OrderStatus).IN_DELIVERY.name()}">W dostawie</option>
+        <option th:value="${T(com.ProHURT.entities.OrderStatus).ACCEPTED.name()}">Przyjęte</option>
+        <option th:value="${T(com.ProHURT.entities.OrderStatus).CANCELED.name()}">Anulowane</option>
+      </select>
+
+      <button type="submit">
+        <i class="fas fa-search"></i> Szukaj
+      </button>
+    </form>
+
+    <!-- Dodanie funkcji sprawdzającej dostęp przed przejściem do formularza -->
+    <a href="#" onclick="checkAccess('/orders/add')" class="button">Dodaj Nowe Zamówienie</a>
+  </div>
+
+  <table>
+    <thead>
+    <tr>
+      <th>ID Zamówienia</th>
+      <th>Status</th>
+      <th>Sklep</th>
+      <th>Szczegóły</th>
+      <th>Usuń</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="order : ${orders}">
+      <td th:text="'#' + ${order.orderNumber}"></td>
+      <td th:text="${order.status.displayName}"></td>
+      <td th:text="${order.store.name}"></td>
+      <td><a th:href="@{'/orders/' + ${order.id}}">Zobacz</a></td>
+      <td class="action-buttons">
+        <!-- Sprawdzanie dostępu przed edytowaniem zamówienia -->
+        <a href="#" onclick="checkAccess('/orders/edit/{id}')"  th:href="@{/orders/edit/{id}(id=${order.id})}" class="button edit-button">Edytuj</a>
+
+        <!-- Sprawdzanie dostępu przed usunięciem zamówienia -->
+        <form th:action="@{'/orders/delete/' + ${order.id}}" method="post" onsubmit="return checkAccessAndConfirm('/orders/delete')">
+          <button type="submit" class="button delete-button">Usuń</button>
+        </form>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+</body>
+</html>

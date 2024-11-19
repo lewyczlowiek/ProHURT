@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Edytuj Produkt - ProHURT</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <style>
+    /* Styl podstawowy strony */
+    body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background-color: #f4f6f8;
+    }
+
+    h1 {
+        font-size: 1.8rem;
+        color: #306ab8;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    /* Styl kontenera formularza */
+    .container {
+        background-color: #fff;
+        padding: 40px 30px;
+        border-radius: 15px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        width: 340px;
+        text-align: center;
+    }
+
+    /* Styl pola formularza */
+    .input-group {
+        position: relative;
+        margin-bottom: 15px;
+    }
+
+    .input-group input[type="text"],
+    .input-group input[type="number"],
+    .input-group textarea,
+    .input-group select {
+        width: 80%;
+        padding: 10px 15px 10px 45px;
+        font-size: 1rem;
+        border-radius: 25px;
+        border: 1px solid #306ab8;
+        outline: none;
+    }
+
+    /* Styl ikonek: białe ikony na niebieskim tle */
+    .input-group .icon {
+        position: absolute;
+        top: 50%;
+        left: 10px;
+        transform: translateY(-50%);
+        background-color: #306ab8;
+        color: #fff;
+        width: 25px;
+        height: 25px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+    }
+
+    /* Styl pola tekstowego */
+    textarea {
+        resize: vertical;
+        height: 80px;
+        font-family: Arial, sans-serif;
+    }
+
+    /* Styl przycisku */
+    button {
+        width: 60%;
+        padding: 10px;
+        font-size: 1rem;
+        color: #fff;
+        background-color: #306ab8;
+        border: none;
+        border-radius: 25px;
+        cursor: pointer;
+        margin-top: 20px;
+        transition: background-color 0.3s;
+    }
+
+    button:hover {
+        background-color: #285694;
+    }
+
+    /* Styl linku powrotu */
+    .footer-links {
+        margin-top: 20px;
+        font-size: 0.9rem;
+    }
+
+    .footer-links a {
+        color: #306ab8;
+        text-decoration: none;
+    }
+
+    .footer-links a:hover {
+        color: #285694;
+    }
+  </style>
+</head>
+<body>
+<h1>Edytuj produkt</h1>
+<div class="container">
+    <form th:action="@{/storeInventory/edit/{id}(id=${item.id})}" th:object="${item}" method="post">
+
+        <div class="input-group">
+            <span class="icon"><i class="fas fa-tag"></i></span>
+            <input type="text" th:field="*{name}" placeholder="Nazwa produktu" required />
+        </div>
+
+        <div class="input-group">
+            <textarea th:field="*{description}" placeholder="Opis produktu" required></textarea>
+        </div>
+
+        <div class="input-group">
+            <span class="icon"><i class="fas fa-boxes"></i></span>
+            <input type="number" th:field="*{quantity}" placeholder="Ilość sztuk" required min="1" />
+        </div>
+
+        <div class="input-group">
+            <span class="icon"><i class="fas fa-dollar-sign"></i></span>
+            <input type="number" th:field="*{price}" placeholder="Cena" step="0.1" required min="0" />
+        </div>
+
+        <div class="input-group">
+            <select th:field="*{category}" required>
+                <option value="" disabled selected>Wybierz kategorię</option>
+                <option th:each="cat : ${categories}"
+                        th:value="${cat.id}"
+                        th:text="${cat.name}"></option>
+            </select>
+        </div>
+
+        <button type="submit">Zapisz zmiany</button>
+    </form>
+
+    <div class="footer-links">
+        <a href="/items">Wróć do listy produktów</a>
+    </div>
+</div>
+</body>
+</html>

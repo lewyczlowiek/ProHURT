@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Rejestracja - ProHURT</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <style>
+        /* Styl podstawowy strony */
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f8;
+        }
+
+        /* Styl nagłówka */
+        h1 {
+            font-size: 1.8rem;
+            color: #306ab8;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        /* Styl kontenera formularza */
+        .container {
+            background-color: #fff;
+            padding: 40px 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 340px;
+            text-align: center;
+        }
+
+        /* Styl pól formularza */
+        input[type="text"], input[type="email"], input[type="password"], select {
+            width: 80%;
+            padding: 10px 15px;
+            margin-bottom: 15px;
+            border: 1px solid #306ab8;
+            border-radius: 25px;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        /* Styl rozwijanego menu */
+        select {
+            text-align: center;
+            color: #555;
+        }
+
+        /* Styl przycisku */
+        button {
+            width: 60%;
+            padding: 10px;
+            font-size: 1rem;
+            color: #fff;
+            background-color: #306ab8;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #285694;
+        }
+
+        /* Styl linku powrotu */
+        .footer-links {
+            margin-top: 20px;
+            font-size: 0.9rem;
+        }
+
+        .footer-links a {
+            color: #306ab8;
+            text-decoration: none;
+        }
+
+        .footer-links a:hover {
+            color: #285694;
+        }
+    </style>
+</head>
+<body>
+<h1>Dodaj nowego użytkownika<br>aplikacji ProHURT</h1>
+<div class="container">
+    <form th:action="@{/users}" th:object="${registrationRequest}" method="post">
+
+        <input type="text" th:field="*{firstname}" placeholder="Imię" required />
+        <input type="text" th:field="*{lastname}" placeholder="Nazwisko" required />
+        <input type="email" th:field="*{email}" placeholder="Email" required />
+        <input type="password" th:field="*{password}" placeholder="Hasło" required />
+        <select th:field="*{role}" required>
+            <option value="" disabled selected>Wybierz rolę</option>
+            <option th:value="'ADMIN'">Admin</option>
+            <option th:value="'MANAGER'">Menadżer</option>
+            <option th:value="'STAFF'">Pracownik</option>
+        </select>
+        <button type="submit">Dodaj użytkownika</button>
+    </form>
+    <div class="footer-links">
+        <a href="/users">Wróć do listy użytkowników</a>
+    </div>
+</div>
+</body>
+</html>

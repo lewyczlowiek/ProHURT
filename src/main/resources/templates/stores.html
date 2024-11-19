@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Lista sklepów - ProHURT</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            height: 100vh;
+        }
+
+         .sidebar {
+            background-color: #306ab8;
+            width: 200px;
+            padding-top: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sidebar a {
+            display: block;
+            color: #fff;
+            text-decoration: none;
+            font-size: 1.2em;
+            padding: 10px 20px;
+            margin: 3px;
+        }
+
+        .sidebar a:hover {
+            background-color: #285694;
+            border-radius: 15px;
+        }
+
+         .user-info {
+            text-align: center;
+            padding: 20px;
+            margin-top: auto;
+            color: white;
+        }
+
+        .user-icon img {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 5px;
+        }
+
+        .logout-button {
+            background-color: #004aad;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            margin: 20px;
+            border-radius: 15px;
+        }
+
+        .logout-button:hover {
+            background-color: #024092;
+        }
+
+        .container {
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 80%;
+            overflow-x: auto;
+            margin: 25px 50px 25px 50px;
+        }
+
+        h1 {
+            text-align: center;
+            font-weight: bold;
+            font-size: 2.5rem;
+            color: black;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #306ab8;
+            color: white;
+        }
+
+        tr {
+            border-bottom: 1px solid #ddd;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .footer-links {
+            margin-top: 20px;
+            text-align: center;
+        }
+  </style>
+</head>
+<body>
+<div class="sidebar">
+  <img style="height: 75px; weight: 75px;" src="/images/ProHURT.png" alt="Logo ProHURT">
+  <div>
+    <a style="margin-top: 150px" th:href="@{/index}">Strona główna</a>
+    <a th:href="@{/items}">Produkty</a>
+    <a th:href="@{/storeInventory}">Magazyn</a>
+    <a href="#" onclick="checkAccess('/users')">Zarządzaj użytkownikami</a>
+    <a th:href="@{/orders}">Zamówienia</a>
+  </div>
+  <div class="user-info">
+    <div class="user-icon">
+      <img th:src="@{images/user.png}">
+    </div>
+    <p><span th:text="${firstname}"></span></p>
+    <form th:action="@{/auth/logout}" method="post">
+      <button type="submit" class="logout-button">Wyloguj</button>
+    </form>
+  </div>
+</div>
+
+<div class="container">
+  <h1>Lista sklepów</h1>
+
+  <table style="margin-top: 50px;">
+    <thead>
+    <tr>
+      <th class="center">Nazwa sklepu</th>
+      <th class="center">Lokalizacja</th>
+      <th class="center">Typ sklepu</th>
+      <th class="center">Kontakt</th>
+      <th class="center">Data otwarcia</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="store : ${allStores}">
+      <td th:text="${store.name}"></td>
+      <td th:text="${store.location}"></td>
+      <td th:text="${store.storeType}"></td>
+      <td th:text="${store.contactInformation}"></td>
+      <td th:text="${#dates.format(store.openingDate, 'yyyy-MM-dd')}"></td>
+    </tr>
+    </tbody>
+  </table>
+
+  <div class="footer-links">
+    <a href="/index">Powrót do strony głównej</a>
+  </div>
+</div>
+
+<script>
+      function checkAccess(url) {
+    console.log('Fetching access for URL:', url);
+    fetch(url, {
+      method: 'GET',
+      credentials: 'include'
+    }).then(response => {
+      if (response.status === 403) {
+        return response.json().then(data => {
+          alert(data.message); // Wyświetlenie komunikatu o braku uprawnień
+          window.location.reload(true);
+        });
+      } else if (response.ok) {
+        window.location.href = url; // Przekierowanie, jeśli użytkownik ma dostęp
+      }
+    }).catch(error => {
+      console.error('Error fetching access:', error);
+      alert("Nie masz odpowiednich uprawnień do tej akcji!");
+    });
+  }
+</script>
+</body>
+</html>
