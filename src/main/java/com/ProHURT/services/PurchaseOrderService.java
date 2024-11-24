@@ -67,100 +67,163 @@ public class PurchaseOrderService {
     }
 
     //Update existing Purchase Order
+//    @Transactional
+//    public PurchaseOrder updatePurchaseOrder(Long id, PurchaseOrder updatedOrder, List<Long> itemIds, List<Integer> quantities) throws ResourceNotFoundException {
+//
+//        // Pobranie zamówienia
+//        PurchaseOrder existingOrder = purchaseOrderRepository.findById(id)
+//                .orElseThrow(() -> new ResourceNotFoundException("Zamówienie o ID " + id + " nie zostało znalezione"));
+//
+//        // Aktualizacja statusu i sklepu zamówienia
+//        existingOrder.setStatus(updatedOrder.getStatus());
+//
+//        if (updatedOrder.getStore() != null) {
+//            Store store = storeRepository.findById(updatedOrder.getStore().getId())
+//                    .orElseThrow(() -> new ResourceNotFoundException("Sklep o ID " + updatedOrder.getStore().getId() + " nie został znaleziony"));
+//            existingOrder.setStore(store);
+//        }
+//
+//        // Aktualizacja pozycji zamówienia
+//        if (itemIds != null && quantities != null && itemIds.size() == quantities.size()) {
+//
+//            // Mapowanie `itemId` do `quantity` dla wygody
+//            Map<Long, Integer> itemQuantityMap = new HashMap<>();
+//            for (int i = 0; i < itemIds.size(); i++) {
+//                itemQuantityMap.put(itemIds.get(i), quantities.get(i));
+//            }
+//
+//            // Usuwanie produktów, które nie znajdują się w `itemIds`
+//            List<PurchaseOrderLineItem> existingLineItems = purchaseOrderLineItemRepository.findByPurchaseOrderId(id);
+//            for (PurchaseOrderLineItem lineItem : existingLineItems) {
+//                if (!itemQuantityMap.containsKey(lineItem.getItem().getId())) {
+//                    purchaseOrderLineItemRepository.delete(lineItem);
+//                }
+//            }
+//
+//            // Aktualizacja lub dodawanie pozycji zamówienia
+//            for (Map.Entry<Long, Integer> entry : itemQuantityMap.entrySet()) {
+//                Long itemId = entry.getKey();
+//                int quantity = entry.getValue();
+//
+//                Item item = itemRepository.findById(itemId)
+//                        .orElseThrow(() -> new ResourceNotFoundException("Produkt o ID " + itemId + " nie został znaleziony"));
+//
+//                // Pobranie lub utworzenie nowej pozycji zamówienia
+//                PurchaseOrderLineItem lineItem = purchaseOrderLineItemRepository.findByPurchaseOrderAndItem(existingOrder, item)
+//                        .orElseGet(() -> {
+//                            PurchaseOrderLineItem newItem = new PurchaseOrderLineItem();
+//                            newItem.setPurchaseOrder(existingOrder);
+//                            newItem.setItem(item);
+//                            return newItem;
+//                        });
+//                System.out.println("Aktualizowany produkt: " + item.getId() + ", aktualna ilość: " + lineItem.getQuantity());
+//                // Ustawienie ilości
+//                lineItem.setQuantity(quantity);
+//                purchaseOrderLineItemRepository.save(lineItem);
+//            }
+//        }
+//
+//        // Zapisanie głównego zamówienia po wprowadzeniu wszystkich zmian
+//        return purchaseOrderRepository.save(existingOrder);
+//    }
+
+//    public void updatePurchaseOrderWithItems(Long id, PurchaseOrder purchaseOrder, Map<Long, Integer> itemsToQuantities) {
+//        // Pobierz istniejące zamówienie
+//        PurchaseOrder existingOrder = purchaseOrderRepository.findById(id)
+//                .orElseThrow(() -> new ResourceNotFoundException("Zamówienie nie istnieje."));
+//
+//        // Aktualizuj podstawowe dane
+//        existingOrder.setStatus(purchaseOrder.getStatus());
+//        existingOrder.setStore(purchaseOrder.getStore());
+//
+//        // Aktualizuj produkty w zamówieniu
+//        List<PurchaseOrderLineItem> lineItems = existingOrder.getLineItems();
+//
+//        // Mapuj istniejące elementy dla szybkiego dostępu
+//        Map<Long, PurchaseOrderLineItem> existingItemsMap = lineItems.stream()
+//                .collect(Collectors.toMap(item -> item.getItem().getId(), item -> item));
+//
+//        for (Map.Entry<Long, Integer> entry : itemsToQuantities.entrySet()) {
+//            Long itemId = entry.getKey();
+//            Integer quantity = entry.getValue();
+//
+//            if (existingItemsMap.containsKey(itemId)) {
+//                // Jeśli produkt już istnieje, zaktualizuj ilość
+//                existingItemsMap.get(itemId).setQuantity(quantity);
+//            } else {
+//                // Jeśli produkt jest nowy, dodaj go do zamówienia
+//                Item item = itemService.getItemById(itemId);
+//               //Item item = itemRepository.findById(itemId);
+//                PurchaseOrderLineItem newItem = new PurchaseOrderLineItem(item, quantity, existingOrder);
+//                lineItems.add(newItem);
+//            }
+//        }
+//
+//        // Zapisz zmiany w bazie danych
+//        purchaseOrderRepository.save(existingOrder);
+//    }
     @Transactional
     public PurchaseOrder updatePurchaseOrder(Long id, PurchaseOrder updatedOrder, List<Long> itemIds, List<Integer> quantities) throws ResourceNotFoundException {
-
-        // Pobranie zamówienia
+        // Pobranie istniejącego zamówienia
         PurchaseOrder existingOrder = purchaseOrderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Zamówienie o ID " + id + " nie zostało znalezione"));
 
-        // Aktualizacja statusu i sklepu zamówienia
+        // Aktualizacja statusu zamówienia
         existingOrder.setStatus(updatedOrder.getStatus());
 
+        // Aktualizacja sklepu
         if (updatedOrder.getStore() != null) {
             Store store = storeRepository.findById(updatedOrder.getStore().getId())
                     .orElseThrow(() -> new ResourceNotFoundException("Sklep o ID " + updatedOrder.getStore().getId() + " nie został znaleziony"));
             existingOrder.setStore(store);
         }
 
-        // Aktualizacja pozycji zamówienia
-        if (itemIds != null && quantities != null && itemIds.size() == quantities.size()) {
+        // Sprawdzenie poprawności list produktów i ilości
+        if (itemIds == null || quantities == null || itemIds.size() != quantities.size()) {
+            throw new IllegalArgumentException("Listy produktów i ilości muszą być zgodne rozmiarowo i nie mogą być null.");
+        }
 
-            // Mapowanie `itemId` do `quantity` dla wygody
-            Map<Long, Integer> itemQuantityMap = new HashMap<>();
-            for (int i = 0; i < itemIds.size(); i++) {
-                itemQuantityMap.put(itemIds.get(i), quantities.get(i));
-            }
+        // Pobranie istniejących pozycji zamówienia
+        List<PurchaseOrderLineItem> existingLineItems = purchaseOrderLineItemRepository.findByPurchaseOrderId(id);
 
-            // Usuwanie produktów, które nie znajdują się w `itemIds`
-            List<PurchaseOrderLineItem> existingLineItems = purchaseOrderLineItemRepository.findByPurchaseOrderId(id);
-            for (PurchaseOrderLineItem lineItem : existingLineItems) {
-                if (!itemQuantityMap.containsKey(lineItem.getItem().getId())) {
-                    purchaseOrderLineItemRepository.delete(lineItem);
-                }
-            }
-
-            // Aktualizacja lub dodawanie pozycji zamówienia
-            for (Map.Entry<Long, Integer> entry : itemQuantityMap.entrySet()) {
-                Long itemId = entry.getKey();
-                int quantity = entry.getValue();
-
-                Item item = itemRepository.findById(itemId)
-                        .orElseThrow(() -> new ResourceNotFoundException("Produkt o ID " + itemId + " nie został znaleziony"));
-
-                // Pobranie lub utworzenie nowej pozycji zamówienia
-                PurchaseOrderLineItem lineItem = purchaseOrderLineItemRepository.findByPurchaseOrderAndItem(existingOrder, item)
-                        .orElseGet(() -> {
-                            PurchaseOrderLineItem newItem = new PurchaseOrderLineItem();
-                            newItem.setPurchaseOrder(existingOrder);
-                            newItem.setItem(item);
-                            return newItem;
-                        });
-
-                // Ustawienie ilości
-                lineItem.setQuantity(quantity);
+        // Iteracja po istniejących pozycjach, aktualizacja lub usuwanie
+        existingLineItems.removeIf(lineItem -> {
+            Long itemId = lineItem.getItem().getId();
+            if (itemIds.contains(itemId)) {
+                // Jeśli produkt istnieje, aktualizujemy ilość
+                int index = itemIds.indexOf(itemId);
+                lineItem.setQuantity(quantities.get(index));
                 purchaseOrderLineItemRepository.save(lineItem);
-            }
-        }
 
-        // Zapisanie głównego zamówienia po wprowadzeniu wszystkich zmian
-        return purchaseOrderRepository.save(existingOrder);
-    }
-
-    public void updatePurchaseOrderWithItems(Long id, PurchaseOrder purchaseOrder, Map<Long, Integer> itemsToQuantities) {
-        // Pobierz istniejące zamówienie
-        PurchaseOrder existingOrder = purchaseOrderRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Zamówienie nie istnieje."));
-
-        // Aktualizuj podstawowe dane
-        existingOrder.setStatus(purchaseOrder.getStatus());
-        existingOrder.setStore(purchaseOrder.getStore());
-
-        // Aktualizuj produkty w zamówieniu
-        List<PurchaseOrderLineItem> lineItems = existingOrder.getLineItems();
-
-        // Mapuj istniejące elementy dla szybkiego dostępu
-        Map<Long, PurchaseOrderLineItem> existingItemsMap = lineItems.stream()
-                .collect(Collectors.toMap(item -> item.getItem().getId(), item -> item));
-
-        for (Map.Entry<Long, Integer> entry : itemsToQuantities.entrySet()) {
-            Long itemId = entry.getKey();
-            Integer quantity = entry.getValue();
-
-            if (existingItemsMap.containsKey(itemId)) {
-                // Jeśli produkt już istnieje, zaktualizuj ilość
-                existingItemsMap.get(itemId).setQuantity(quantity);
+                // Usuwamy go z list wejściowych, aby przetworzyć nowe elementy
+                itemIds.remove(index);
+                quantities.remove(index);
+                return false; // Pozostawiamy w zamówieniu
             } else {
-                // Jeśli produkt jest nowy, dodaj go do zamówienia
-                Item item = itemService.getItemById(itemId);
-               //Item item = itemRepository.findById(itemId);
-                PurchaseOrderLineItem newItem = new PurchaseOrderLineItem(item, quantity, existingOrder);
-                lineItems.add(newItem);
+                // Usuwamy pozycje, które nie znajdują się w nowych danych
+                purchaseOrderLineItemRepository.delete(lineItem);
+                return true;
             }
+        });
+
+        // Dodawanie nowych pozycji
+        for (int i = 0; i < itemIds.size(); i++) {
+            Long newItemId = itemIds.get(i);
+            Integer quantity = quantities.get(i);
+
+            Item newItem = itemRepository.findById(newItemId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Produkt o ID " + newItemId + " nie został znaleziony"));
+
+            PurchaseOrderLineItem newLineItem = new PurchaseOrderLineItem();
+            newLineItem.setPurchaseOrder(existingOrder);
+            newLineItem.setItem(newItem);
+            newLineItem.setQuantity(quantity);
+
+            purchaseOrderLineItemRepository.save(newLineItem);
         }
 
-        // Zapisz zmiany w bazie danych
-        purchaseOrderRepository.save(existingOrder);
+        // Zapisanie zmian w zamówieniu
+        return purchaseOrderRepository.save(existingOrder);
     }
 
 
@@ -230,27 +293,27 @@ public class PurchaseOrderService {
         }
     }
 
-    public void updateLineItemQuantity(Long orderId, Long itemId, int quantity) throws ResourceNotFoundException {
-        // Wyszukiwanie zamówienia
-        PurchaseOrder order = purchaseOrderRepository.findById(orderId)
-                .orElseThrow(() -> new ResourceNotFoundException("Zamówienie o ID " + orderId + " nie zostało znalezione"));
-
-        // Wyszukiwanie produktu
-        Item item = itemRepository.findById(itemId)
-                .orElseThrow(() -> new ResourceNotFoundException("Produkt o ID " + itemId + " nie został znaleziony"));
-
-        // Wyszukiwanie pozycji zamówienia (line item)
-        PurchaseOrderLineItem lineItem = purchaseOrderLineItemRepository.findByPurchaseOrderAndItem(order, item)
-                .orElseThrow(() -> new ResourceNotFoundException("Pozycja zamówienia dla tego produktu nie istnieje"));
-
-        // Sprawdzanie, czy ilość jest różna od obecnej
-        if (lineItem.getQuantity() != quantity) {
-            // Aktualizacja ilości
-            lineItem.setQuantity(quantity);
-            purchaseOrderLineItemRepository.save(lineItem);  // Zapisz zmiany
-        } else {
-            // Możesz dodać logikę logowania, jeśli ilość jest taka sama
-            System.out.println("Ilość jest już taka sama, brak zmiany.");
-        }
-    }
+//    public void updateLineItemQuantity(Long orderId, Long itemId, int quantity) throws ResourceNotFoundException {
+//        // Wyszukiwanie zamówienia
+//        PurchaseOrder order = purchaseOrderRepository.findById(orderId)
+//                .orElseThrow(() -> new ResourceNotFoundException("Zamówienie o ID " + orderId + " nie zostało znalezione"));
+//
+//        // Wyszukiwanie produktu
+//        Item item = itemRepository.findById(itemId)
+//                .orElseThrow(() -> new ResourceNotFoundException("Produkt o ID " + itemId + " nie został znaleziony"));
+//
+//        // Wyszukiwanie pozycji zamówienia (line item)
+//        PurchaseOrderLineItem lineItem = purchaseOrderLineItemRepository.findByPurchaseOrderAndItem(order, item)
+//                .orElseThrow(() -> new ResourceNotFoundException("Pozycja zamówienia dla tego produktu nie istnieje"));
+//
+//        // Sprawdzanie, czy ilość jest różna od obecnej
+//        if (lineItem.getQuantity() != quantity) {
+//            // Aktualizacja ilości
+//            lineItem.setQuantity(quantity);
+//            purchaseOrderLineItemRepository.save(lineItem);  // Zapisz zmiany
+//        } else {
+//            // Możesz dodać logikę logowania, jeśli ilość jest taka sama
+//            System.out.println("Ilość jest już taka sama, brak zmiany.");
+//        }
+//    }
 }

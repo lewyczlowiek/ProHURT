@@ -6,6 +6,7 @@ import com.ProHURT.services.ItemService;
 import com.ProHURT.services.PurchaseOrderService;
 import com.ProHURT.services.StoreService;
 import com.ProHURT.services.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/orders")
@@ -128,36 +130,38 @@ public class PurchaseOrderController {
                                       @ModelAttribute PurchaseOrder purchaseOrder,
                                       @RequestParam String status,
                                       @RequestParam Long storeId,
-                                      @RequestParam(required = false) List<Long> item_ids,
-                                      @RequestParam(required = false) List<Integer> quantities,
+                                      HttpServletRequest request,
                                       RedirectAttributes redirectAttributes) {
+        // Pobierz listy ręcznie, jeśli wymagane
+        String[] itemIdsArray = request.getParameterValues("item_ids[]");
+        String[] quantitiesArray = request.getParameterValues("quantities[]");
+
+        // Tworzenie modyfikowalnych list z danych wejściowych
+        List<Long> item_ids = itemIdsArray != null
+                ? new ArrayList<>(Arrays.asList(itemIdsArray).stream().map(Long::parseLong).collect(Collectors.toList()))
+                : null;
+        List<Integer> quantities = quantitiesArray != null
+                ? new ArrayList<>(Arrays.asList(quantitiesArray).stream().map(Integer::parseInt).collect(Collectors.toList()))
+                : null;
+
+        // Debugging
+        System.out.println("Received item_ids: " + item_ids);
+        System.out.println("Received quantities: " + quantities);
+
         try {
-            // Ustawienie statusu i sklepu
+            // Update PurchaseOrder
             purchaseOrder.setStatus(OrderStatus.valueOf(status));
             purchaseOrder.setStore(storeService.getStoreById(storeId));
-
-            // Mapowanie elementów z list item_ids i quantities
-            Map<Long, Integer> itemsToQuantities = new HashMap<>();
-            if (item_ids != null && quantities != null) {
-                for (int i = 0; i < item_ids.size(); i++) {
-                    itemsToQuantities.put(item_ids.get(i), quantities.get(i));
-                }
-            }
-
-            // Aktualizacja zamówienia z elementami
-            purchaseOrderService.updatePurchaseOrderWithItems(id, purchaseOrder, itemsToQuantities);
-
+            purchaseOrderService.updatePurchaseOrder(id, purchaseOrder, item_ids, quantities);
             redirectAttributes.addFlashAttribute("success", "Zamówienie zaktualizowane pomyślnie!");
-        } catch (ResourceNotFoundException e) {
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
-        } catch (IllegalArgumentException e) {
-            redirectAttributes.addFlashAttribute("error", "Rozmiary list `item_ids` i `quantities` muszą być zgodne.");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Wystąpił błąd przy aktualizacji zamówienia.");
+            redirectAttributes.addFlashAttribute("error", "Wystąpił błąd: " + e.getMessage());
+            e.printStackTrace();
         }
 
         return "redirect:/orders";
     }
+
 
 
 
@@ -191,7 +195,6 @@ public class PurchaseOrderController {
         List<PurchaseOrderLineItem> lineItems;  // Zmiana z Set na List
         try {
             lineItems = purchaseOrderService.getPurchaseOrderLineItems(id);
-            System.out.println("Line items: " + lineItems);  // Debugowanie
         } catch (ResourceNotFoundException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
             return "redirect:/orders";

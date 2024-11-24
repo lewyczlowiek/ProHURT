@@ -4,7 +4,7 @@
     <title>Edytuj Zamówienie</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"/>
     <style>
-    /* Podstawowe style jak w orders.html */
+    /* Podstawowe style */
     body {
       margin: 0;
       padding: 0;
@@ -24,8 +24,8 @@
       width: 50%;
       margin: 20px auto;
       max-width: 800px;
-      max-height: 95vh; /* Ustalamy maksymalną wysokość */
-      overflow-y: auto; /* Dodajemy scroll, jeśli wysokość formularza przekroczy ekran */
+      max-height: 95vh;
+      overflow-y: auto;
     }
 
     h2 {
@@ -38,7 +38,7 @@
     form {
       display: flex;
       flex-direction: column;
-      gap: 15px; /* Zmniejszenie odstępów */
+      gap: 15px;
     }
 
     label {
@@ -79,19 +79,13 @@
     }
 
     table th, table td {
-      padding: 6px;  /* Zmniejszenie paddingu */
+      padding: 6px;
       text-align: left;
       border: 1px solid #ddd;
     }
 
     table th {
       background-color: #f4f7fc;
-    }
-
-    .product-selection {
-      margin-top: 10px;
-      display: flex;
-      flex-direction: column;
     }
 
     .select-wrapper {
@@ -140,16 +134,15 @@
     .remove-button:hover {
       background-color: #e60000;
     }
-
-  </style>
+    </style>
 </head>
 <body>
 <div class="container">
     <h2>Edytuj Zamówienie</h2>
 
-    <!-- Formularz z metodą POST i poprawnym URL -->
+    <!-- Formularz z metodą POST -->
     <form th:action="@{/orders/edit/{id}(id=${purchaseOrder.id})}" method="post">
-        <!-- Wybór sklepu -->
+        <!-- Sklep -->
         <div>
             <label for="store">Wybierz sklep:</label>
             <select name="storeId" id="store" required>
@@ -157,7 +150,7 @@
             </select>
         </div>
 
-        <!-- Status zamówienia -->
+        <!-- Status -->
         <div>
             <label for="status">Status zamówienia:</label>
             <select name="status" id="status" required>
@@ -169,87 +162,96 @@
         <div class="product-list">
             <h3>Produkty w zamówieniu:</h3>
             <table>
+                <thead>
                 <tr>
                     <th>Produkt</th>
                     <th>Ilość</th>
                     <th>Akcje</th>
+                </tr>
+                </thead>
+                <tbody>
                 <tr th:each="lineItem, iter : ${lineItems}">
                     <td th:text="${lineItem.item.name}">Nazwa Produktu</td>
-                    <td><input type="number" name="quantities[__${iter.index}__]" th:value="${lineItem.quantity}" min="1"></td>
+                    <td><input type="number" name="quantities[]" th:value="${lineItem.quantity}" min="1"></td>
                     <td>
-                        <input type="hidden" name="item_ids[__${iter.index}__]" th:value="${lineItem.item.id}" />
-                        <button type="submit" class="remove-button" th:formaction="@{'/orders/' + ${purchaseOrder.id} + '/items/' + ${lineItem.id} + '/delete'}">Usuń</button>
+                        <input type="hidden" name="item_ids[]" th:value="${lineItem.item.id}" />
+                        <button type="button" class="remove-button" onclick="removeProduct(this)">Usuń</button>
                     </td>
                 </tr>
+                </tbody>
             </table>
         </div>
 
-        <!-- Dodaj produkt -->
+        <!-- Dodaj Nowy Produkt -->
         <div class="product-selection">
             <h3>Dodaj Nowy Produkt:</h3>
             <div class="select-wrapper">
                 <div>
                     <label for="item">Wybierz produkt:</label>
-                    <select name="item_ids" id="item">
+                    <select id="item">
                         <option th:each="item : ${items}" th:value="${item.id}" th:text="${item.name}">Wybierz produkt</option>
                     </select>
                 </div>
                 <div>
                     <label for="quantity">Ilość:</label>
-                    <input type="number" name="quantities" id="quantity" min="1" value="1">
+                    <input type="number" id="quantity" min="1" value="1">
                 </div>
             </div>
             <button type="button" class="button add-product-btn" onclick="addProduct()">Dodaj produkt</button>
         </div>
 
-        <!-- Przycisk zapisu -->
+        <!-- Zapisz -->
         <button type="submit" class="button">Zapisz Zmiany</button>
     </form>
 </div>
 
 <script>
-  function addProduct() {
+function addProduct() {
     const productSelect = document.getElementById("item");
     const quantityInput = document.getElementById("quantity");
-    const productList = document.querySelector(".product-list table");
+    const productList = document.querySelector(".product-list table tbody");
 
     const productId = productSelect.value;
     const productName = productSelect.options[productSelect.selectedIndex].text;
-    const quantity = quantityInput.value;
+    const quantity = parseInt(quantityInput.value, 10);
 
-    if (quantity > 0 && productId !== "") {
-        // Sprawdź, czy produkt już istnieje w tabeli
-        const existingRow = Array.from(productList.rows).find(row =>
-            row.querySelector(`input[name='item_ids[]']`)?.value === productId
-        );
-
-        if (existingRow) {
-            // Zaktualizuj ilość istniejącego produktu
-            const quantityField = existingRow.querySelector(`input[name='quantities[]']`);
-            quantityField.value = parseInt(quantityField.value) + parseInt(quantity);
-        } else {
-            // Dodaj nowy wiersz dla produktu
-            const row = productList.insertRow();
-            row.innerHTML = `
-                <td>${productName}</td>
-                <td>
-                    <input type="number" name="quantities[]" value="${quantity}" min="1" />
-                </td>
-                <td>
-                    <input type="hidden" name="item_ids[]" value="${productId}" />
-                    <button type="button" class="remove-button" onclick="removeProduct(this)">Usuń</button>
-                </td>
-            `;
-        }
-        // Wyczyść pola wyboru
-        quantityInput.value = "";
+    if (!productId || isNaN(quantity) || quantity <= 0) {
+        alert("Wybierz produkt i podaj poprawną ilość.");
+        return;
     }
+
+    // Sprawdź, czy produkt już istnieje
+    const existingRow = Array.from(productList.rows).find(row =>
+        row.querySelector("input[name='item_ids[]']").value === productId
+    );
+
+    if (existingRow) {
+        // Aktualizuj ilość
+        const quantityField = existingRow.querySelector("input[name='quantities[]']");
+        quantityField.value = parseInt(quantityField.value) + quantity;
+    } else {
+        // Dodaj nowy wiersz
+        const row = productList.insertRow();
+        row.innerHTML = `
+            <td>${productName}</td>
+            <td>
+                <input type="number" name="quantities[]" value="${quantity}" min="1" />
+            </td>
+            <td>
+                <input type="hidden" name="item_ids[]" value="${productId}" />
+                <button type="button" class="remove-button" onclick="removeProduct(this)">Usuń</button>
+            </td>
+        `;
+    }
+
+    productSelect.selectedIndex = 0;
+    quantityInput.value = 1;
 }
 
-  function removeProduct(button) {
-    button.closest("tr").remove();
-  }
+function removeProduct(button) {
+    const row = button.closest('tr');
+    row.remove();
+}
 </script>
-
 </body>
 </html>
