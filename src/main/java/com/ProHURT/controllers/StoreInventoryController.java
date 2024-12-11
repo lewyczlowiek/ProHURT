@@ -37,7 +37,6 @@ public class StoreInventoryController {
     }
 
 
-    // Wyświetlenie listy produktów w magazynie
     @GetMapping
     public String listItems(@RequestParam(value = "search", required = false) String search,
                             @RequestParam(value = "category", required = false) String category,
@@ -59,7 +58,6 @@ public class StoreInventoryController {
             items = itemService.getAllItems();
         }
 
-        // Sortowanie
         if ("asc".equals(sort)) {
             items.sort(Comparator.comparingInt(Item::getQuantity));
         } else if ("desc".equals(sort)) {
@@ -69,17 +67,14 @@ public class StoreInventoryController {
         model.addAttribute("items", items);
         model.addAttribute("search", search);
         model.addAttribute("categories", itemService.getAllCategories());
-        model.addAttribute("sort", sort); // Dodano do modelu, aby zachować aktualny sort
+        model.addAttribute("sort", sort);
         return "storeInventory";
     }
 
-    // Edytowanie produktu
+
     @GetMapping("/edit/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public String editItem(@PathVariable Long id, Model model) {
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        User currentUser = (User) authentication.getPrincipal();
-
 
         Item item = itemService.getItemById(id);
         model.addAttribute("item", item);
@@ -89,25 +84,21 @@ public class StoreInventoryController {
         return "editItem";
     }
 
-    // Aktualizacja produktu
     @PostMapping("/edit/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public String updateItem(@PathVariable Long id, @ModelAttribute Item item) {
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        User currentUser = (User) authentication.getPrincipal();
-
         itemService.updateItem(id, item);
         return "redirect:/storeInventory";
     }
 
-    // Aktualizacja ilości produktu
+
     @PostMapping("/updateQuantity/{id}")
     public String updateQuantity(@PathVariable Long id, @RequestParam int quantity) {
         itemService.updateQuantity(id, quantity);
         return "redirect:/storeInventory";
     }
 
-    // Usunięcie produktu
+
     @PostMapping("/deleteItem")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public String deleteProduct(@RequestParam("productId") Long productId, RedirectAttributes redirectAttributes) {
@@ -117,20 +108,17 @@ public class StoreInventoryController {
         itemService.deleteItem(productId);
         redirectAttributes.addFlashAttribute("message", "Produkt został usunięty!");
 
-        // Przekierowanie na stronę z listą produktów
+
         return "redirect:/storeInventory";
     }
 
-    // Wyświetlenie formularza dodawania kategorii
     @GetMapping("/categories/create")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public String showCreateCategoryForm(Model model) {
         model.addAttribute("itemCategory", new ItemCategory());
-        return "addItemCategory"; // Zwracamy widok formularza dodawania kategorii
+        return "addItemCategory";
     }
 
-
-    // Dodawanie nowej kategorii
     @PostMapping("/categories/create")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public String createCategory(@ModelAttribute ItemCategory itemCategory) {

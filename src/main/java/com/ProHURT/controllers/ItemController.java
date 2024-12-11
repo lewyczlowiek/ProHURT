@@ -1,6 +1,5 @@
 package com.ProHURT.controllers;
 
-//import com.ProHURT.entities.Item;
 import com.ProHURT.entities.Item;
 import com.ProHURT.entities.ItemCategory;
 import com.ProHURT.services.CategoryService;
@@ -31,16 +30,11 @@ public class ItemController {
     @GetMapping("/create")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public String showCreateItemForm(Model model) {
-        // Utworzenie nowego obiektu Item
         Item item = new Item();
-
-        // Ustawienie domyślnej kategorii (jeśli to potrzebne) lub można to pominąć
-        // item.setCategory(new ItemCategory());
-
         model.addAttribute("item", item);
         List<ItemCategory> categories = categoryService.getAllCategories();
         model.addAttribute("categories", categories);
-        return "item_form"; // Upewnij się, że to jest prawidłowa nazwa widoku
+        return "item_form";
     }
 
     @PostMapping("/create")
@@ -52,24 +46,19 @@ public class ItemController {
         if (result.hasErrors()) {
             System.out.println("Wystąpił błąd w przekazaniu formularza.");
 
-            // Dodaj kategorie do modelu, aby były dostępne w przypadku błędu
             List<ItemCategory> categories = categoryService.getAllCategories();
             model.addAttribute("categories", categories);
-            return "item_form"; // Zwróć widok formularza, jeśli są błędy
+            return "item_form";
         }
 
-        // Sprawdzenie, czy kategoria jest poprawnie ustawiona
         if (item.getCategory() == null || item.getCategory().getId() == null) {
             System.out.println("Kategoria jest pusta lub ID kategorii jest puste!");
-
-            // Dodaj kategorie do modelu w przypadku błędu
             List<ItemCategory> categories = categoryService.getAllCategories();
             model.addAttribute("categories", categories);
-            return "item_form"; // Zwróć widok formularza z błędem
+            return "item_form";
         }
 
-        // Utworzenie przedmiotu
         itemService.createItem(item);
-        return "redirect:/items"; // Przekierowanie do listy przedmiotów
+        return "redirect:/items";
     }
 }

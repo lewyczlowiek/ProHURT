@@ -48,32 +48,4 @@ public class ApplicationConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-//    @Bean
-//    public UserDetailsService userDetailsService() {
-//        return username -> repository.findByEmail(username)
-//                .map(user -> {
-//                    System.out.println("Rola użytkownika: " + user.getRole());
-//                    return new org.springframework.security.core.userdetails.User(
-//                            user.getEmail(),
-//                            user.getPassword(),
-//                            user.getAuthorities());
-//                })
-//                .orElseThrow(() -> new UsernameNotFoundException("User with this email wasn't found!!!"));
-//    }
-//
-//    @Bean
-//    public AuthenticationProvider authenticationProvider() {
-//        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-//        authProvider.setUserDetailsService(userDetailsService());
-//        authProvider.setPasswordEncoder(passwordEncoder());
-//        return authProvider;
-//    }
-//
-//    @Bean
-//    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-//        return config.getAuthenticationManager();
-//    }
-//
-//    @Bean
-//    public PasswordEncoder passwordEncoder() {return new BCryptPasswordEncoder();}
 }

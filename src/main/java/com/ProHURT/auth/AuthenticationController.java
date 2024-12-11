@@ -13,7 +13,6 @@ import org.springframework.ui.Model;
 @Controller
 @RequestMapping("/auth")
 public class AuthenticationController {
-
     private final UserService userService;
     private final AuthenticationService authenticationService;
 

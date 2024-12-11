@@ -46,23 +46,6 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public User updateUser(Long id, User user, HttpServletRequest request, HttpServletResponse response) throws ResourceNotFoundException {
-        return userRepository.findById(id).map(existingUser -> {
-            // Sprawdź, czy rola zmienia się z ADMIN na inną
-            if (existingUser.getRole().equals("ADMIN") && !user.getRole().equals("ADMIN")) {
-                // Wyloguj użytkownika
-                SecurityContextLogoutHandler logoutHandler = new SecurityContextLogoutHandler();
-                logoutHandler.logout(request, response, SecurityContextHolder.getContext().getAuthentication());
-
-                // Dodaj tutaj logikę, aby ustawić komunikat o konieczności ponownego logowania
-            }
-
-            // Zaktualizuj dane użytkownika
-            user.setId(id);
-            return userRepository.save(user);
-        }).orElseThrow(() -> new ResourceNotFoundException("User with this id wasn't found!"));
-    }
-
     public User updateUser(Long id, User user) throws ResourceNotFoundException {
         return userRepository.findById(id).map(existingUser -> {
             existingUser.setFirstname(user.getFirstname());
@@ -81,7 +64,6 @@ public class UserService {
     }
 
 
-    //Get user by id
     @Transactional
     public User getUserById(Long userId) throws ResourceNotFoundException {
         User user = userRepository.findById(userId).orElseThrow(()-> new ResourceNotFoundException("User with this id not found!"));
@@ -92,7 +74,6 @@ public class UserService {
     public User findById(Long id) {return userRepository.findById(id).orElse(null);}
 
     @Transactional
-    //Get User by mail
     public User getUserByEmail(String email) throws ResourceNotFoundException {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(()-> new ResourceNotFoundException("User with this email wasn't found"));
@@ -102,7 +83,6 @@ public class UserService {
         return user;
     }
 
-    //get AllUser
     public List<User> getAllUsers() {return userRepository.findAll();}
 
     public boolean isUSerStoreManager(String email) {
@@ -118,32 +98,12 @@ public class UserService {
                 .orElse(false);
     }
 
-    //Get the stores managed by a user
     public Set<Store> getManagedStores(String email) {
         return userRepository.findByEmail(email)
                 .map(User::getManagedStores)
                 .orElseThrow(()-> new ResourceNotFoundException("User not found!"));
     }
 
-//    //Add store to the stores managed by a user, by user id and store id
-//    @Transactional
-//    public User addManagedStore(Long userId, Long storeId) {
-//        User user = userRepository.findById(userId)
-//                .orElseThrow(()-> new ResourceNotFoundException("User not found!"));
-//
-//        Hibernate.initialize(user.getManagedStores());
-//
-//        Store store = storeRepository.findById(storeId)
-//                .orElseThrow(()-> new ResourceNotFoundException("Store not found!"));
-//
-//        Hibernate.initialize(store.getStoreInventories());
-//
-//        user.addManagedStore(store);
-//
-//        return userRepository.save(user);
-//    }
-
-    //remove a store from the stores managed by a user, referenced by user ID and store ID
     public User removeManagedStore(Long userId, Long storeId) {
         return userRepository.findById(userId)
                 .map(user -> {

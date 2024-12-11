@@ -40,16 +40,16 @@ public class PurchaseOrder {
     @JoinColumn(name = "storeId", referencedColumnName = "id", nullable = false)
     private Store store;
 
-    // Konstruktor z parametrami
+
     public PurchaseOrder(Long id, @NonNull String orderNumber, @NonNull OrderStatus status, List<PurchaseOrderLineItem> lineItems, Store store) {
         this.id = id;
         this.orderNumber = orderNumber;
         this.status = status;
-        this.lineItems = lineItems;  // Prostsza wersja, bez null check
+        this.lineItems = lineItems;
         this.store = store;
     }
 
-    // Dodajemy metodę pomocniczą do dodawania elementów do listy
+
     public void addPurchaseOrderLineItem(PurchaseOrderLineItem purchaseOrderLineItem) {
         lineItems.add(purchaseOrderLineItem);
     }
@@ -60,7 +60,7 @@ public class PurchaseOrder {
                 "id=" + id +
                 ", orderNumber='" + orderNumber + '\'' +
                 ", store=" + store +
-                ", status=" + status.getDisplayName() +  // Wyświetlanie statusu
+                ", status=" + status.getDisplayName() +
                 '}';
     }
 }

@@ -21,7 +21,6 @@ import java.util.Set;
 @Entity
 @Table(name = "_user")
 public class User implements UserDetails, Serializable {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long Id;

@@ -150,7 +150,6 @@ public class HomeController {
 
     @GetMapping("/index")
     public String index(Model model) {
-        // Ustawienie imienia użytkownika
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.getPrincipal() instanceof UserDetails) {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
@@ -163,8 +162,7 @@ public class HomeController {
 
         List<Item> limitedItems = items.stream().limit(11).collect(Collectors.toList());
         model.addAttribute("limitedItems", limitedItems);
-        // Pobranie informacji o sklepie i dodanie do modelu
-        Store store = storeService.getStoreInfo();  // Pobranie informacji o sklepie
+        Store store = storeService.getStoreInfo();
         model.addAttribute("store", store);
 
         List<Store> allStores = storeService.getAllStores();
@@ -192,9 +190,9 @@ public class HomeController {
             model.addAttribute("firstname", user.getFirstname());
         }
 
-        List<Store> allStores = storeService.getAllStores(); // Pobierz wszystkie sklepy
+        List<Store> allStores = storeService.getAllStores();
         model.addAttribute("allStores", allStores);
-        return "stores"; // Zwróć widok o nazwie 'stores'
+        return "stores";
     }
 
     @PreAuthorize("hasRole('ADMIN')")

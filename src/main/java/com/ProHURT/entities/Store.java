@@ -21,10 +21,8 @@ public class Store implements Serializable {
 
     @Column(unique = true)
     private String name;
-
     @NonNull
     private String location;
-
     @NonNull
     private String contactInformation;
 

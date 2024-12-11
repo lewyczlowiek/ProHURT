@@ -27,14 +27,13 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @Autowired
-    private AuthenticationService authenticationService;
 
     @GetMapping("/createUser")
     public String showRegistrationForm(Model model) {
         model.addAttribute("registrationRequest", new RegisterRequest());
         return "create";
     }
+
 
     @PostMapping
     public String addUser(@ModelAttribute("registrationRequest") User registrationRequest, RedirectAttributes redirectAttributes) {

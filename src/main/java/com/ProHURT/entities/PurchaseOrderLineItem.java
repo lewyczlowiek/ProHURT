@@ -18,13 +18,9 @@ public class PurchaseOrderLineItem implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_id", referencedColumnName = "id")
     private Item item;
-
-
     private Integer quantity;
 
     @ManyToOne(fetch = FetchType.LAZY)

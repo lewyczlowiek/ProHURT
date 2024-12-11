@@ -28,7 +28,6 @@ public class Role implements GrantedAuthority, Serializable {
     @NonNull
     private String name;
 
-    // New: Added a Set of permissions to the Role class
     @ElementCollection(targetClass = Permission.class)
     @CollectionTable(name = "role_permissions", joinColumns = @JoinColumn(name = "role_id"))
     @Enumerated(EnumType.STRING)
